@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "declarationMap": true,
+        "downlevelIteration": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "importHelpers": true,
+        "jsx": "react",
+        "module": "es6",
+        "moduleResolution": "node",
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "sourceMap": true,
+        "strict": true,
+        "target": "es2015",
+        "baseUrl": "src",
+        "paths": {
+            "@fileforge/hexview": [ "projects/hexview" ]
+        },
+        "lib": [
+            "ES2015",
+            "DOM"
+        ],
+        "outDir": "dist/"
+    },
+    "include": [
+        "src/"
+    ]
+}

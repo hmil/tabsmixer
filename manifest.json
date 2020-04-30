@@ -1,0 +1,24 @@
+{
+    "name": "tabs mixer",
+    "version": "0.1",
+    "description": "Mix tabs volumes with style!",
+    "manifest_version": 2,
+    "browser_action": {
+        "default_popup": "popup.html"
+    },
+    "permissions": [
+        "tabs"
+    ],
+    "content_scripts": [
+        {
+            "matches": ["https://*/*"],
+            "run_at": "document_start",
+            "all_frames": true,
+            "js": ["dist/content.js"]
+        }
+    ],
+    "background": {
+        "scripts": ["vendor/webmidi.js", "dist/background.js"],
+        "persistent": false
+    }
+}
