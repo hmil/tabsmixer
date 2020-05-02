@@ -10,6 +10,10 @@
         }
         .slider-container {
             padding: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            background-color: #646970;
         }
         .slider-container.current {
             background-color: #8590a3;
@@ -33,6 +37,7 @@
             background-color: #1fd9e6;
             background: linear-gradient(0deg, #1fdd1d 0, #1fdd1d 120px, #e8a820 120px,  #e8a820 140px, #e82820 140px);
             position: absolute;
+            transition: height 80ms cubic-bezier(0, 0, 0, 1);
         }
         .fader-handle {
             width: 15px;
@@ -46,7 +51,7 @@
             margin-left: calc(50% - 9.5px);
         }
         .fader {
-            position: relative;
+            padding-bottom: 10px;
         }
         .slider-icon {
             position: absolute;
@@ -55,7 +60,7 @@
         }
         .sliders {
             display: flex;
-            align-items: center;
+            align-items: stretch;
             width: 100%;
         }
         .add-tab-button {

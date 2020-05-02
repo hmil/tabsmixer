@@ -10,6 +10,7 @@ export type RefreshStateMessage = BaseMessage<'refresh', AppState>;
 export type BackgroundMessageIn =
         BaseMessage<'addTab', TabEntry> |
         BaseMessage<'removeTab', number> |
+        BaseMessage<'moveTab', { tabId: number, newIndex: number }> |
         BaseMessage<'setVolume', { tabId: number, volume: number}> |
         BaseMessage<'setMuted', { tabId: number, muted: boolean }> |
         BaseMessage<'refresh', void>;

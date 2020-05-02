@@ -4,7 +4,11 @@
     "description": "Mix tabs volumes with style!",
     "manifest_version": 2,
     "browser_action": {
-        "default_popup": "popup.html"
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "faders16.png",
+            "32": "faders.png"
+        }
     },
     "permissions": [
         "tabs"

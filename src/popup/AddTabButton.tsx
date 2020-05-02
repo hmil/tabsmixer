@@ -13,13 +13,14 @@ export function AddTabButton({currentTabId}: AddTabProps) {
         ctx.background.addTab({
             tabId: currentTabId,
             volume: 1,
-            level: 0,
             muted: false
         })
     }, [ctx, currentTabId]);
 
-    return <div style={{ textAlign: 'center', flexGrow: 1 }}>
-        <button onClick={addTabToContext} className="add-tab-button" >+</button><br />
-        Add this tab
+    return <div className={'slider-container current'}>
+        <div style={{textAlign: 'center'}}>
+            <button onClick={addTabToContext} className="add-tab-button" >+</button><br />
+            Add tab
+        </div>
     </div>;
 }

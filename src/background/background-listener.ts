@@ -27,6 +27,10 @@ export class BackgroundListener {
                 this.storage.removeTab(message.data);
                 this.refresh();
                 break;
+            case 'moveTab':
+                this.storage.moveTab(message.data.tabId, message.data.newIndex);
+                this.refresh();
+                break;
             case 'refresh':
                 this.refresh();
                 break;

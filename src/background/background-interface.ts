@@ -18,6 +18,15 @@ export class BackgroundInterface {
         });
     }
 
+    moveTab(tabId: number, newIndex: number): void {
+        sendMessage({
+            type: 'moveTab',
+            data: {
+                tabId, newIndex
+            }
+        });
+    }
+
     removeTab(tabId: number): void {
         sendMessage({
             type: 'removeTab',

@@ -89,29 +89,24 @@ function agent() {
                     result.addTrack(t);
                 });
                 micGainNodes.push(g);
-                // result.getAudioTracks().forEach(t => {
-                //     if (globalContext == null) {
-                //         globalContext = new AudioContext();
-                //     }
-                //     result.addTrack(n.stream.getAudioTracks()[0]);
-                //     // t.addEventListener('mute', () => {
-                //     //     console.log('muted');
-                //     // });
-                // });
                 // TODO: garbage collection
                 return result;
             });
         }
     }
 
+    function inspectNewNode(node: Node) {
+        if (node instanceof HTMLAudioElement || node instanceof HTMLVideoElement) {
+            captureAudioElement(node);
+        } else {
+            node.childNodes.forEach(inspectNewNode);
+        }
+    }
+
     function observeDOM() {
         const observer = new MutationObserver((mutations) => {
             mutations.forEach(mutation => {
-                mutation.addedNodes.forEach(node => {
-                    if (node instanceof HTMLAudioElement || node instanceof HTMLVideoElement) {
-                        captureAudioElement(node);
-                    }
-                })
+                mutation.addedNodes.forEach(inspectNewNode)
             });
         });
         observer.observe((document.body ? document.body : document), {
@@ -167,20 +162,23 @@ function agent() {
         .map(a => {
                 const buffer = new Uint8Array(a.fftSize);
                 a.getByteTimeDomainData(buffer);
-                let avg = 0.0;
+                let max = 0.0;
                 for (let i = 0 ; i < buffer.length ; i++) {
-                    const z = buffer[i] - 128;
-                    avg += z * z;
+                    const z = (buffer[i] - 128) / 128.0;
+                    const v = Math.log2(1 + Math.abs(z));
+                    if (v > max) {
+                        max = v;
+                    }
                 }
-                return Math.sqrt(avg / buffer.length);
+                return max;
             })
-        .reduce((prev, cur) => prev + cur, 0) / analyzerNodes.length;
+        .reduce((prev, cur) => prev > cur ? prev : cur, 0);
     }
 
     let previousValue = 0;
     function analyzeHandler() {
         const value = analyze();
-        if (value < 1 && previousValue < 1) {
+        if (value < 0.01 && previousValue < 0.01) {
             return;
         }
         previousValue = value;
@@ -189,9 +187,11 @@ function agent() {
 
     setInterval(analyzeHandler, 100);
 
+    console.log('Méfait accompli');
+
     // Remove self from the DOM to avoid interfering with logic on the page
-    // const selfScript = document.getElementById('hmil-tabsmixer-agent');
-    // selfScript?.parentElement?.removeChild(selfScript);
+    const selfScript = document.getElementById('hmil-tabsmixer-agent');
+    selfScript?.parentElement?.removeChild(selfScript);
 }
 
 agent();

@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { Faders } from './Faders';
 import { BackgroundInterface } from 'background/background-interface';
 import { PopupContext } from './PopupContext';
-import { TabEntry } from 'background/state/app-state';
 import { ContentMessageOut } from 'content/content-transport';
+import { UITab } from './domain/UITab';
+import { TabEntry } from 'background/state/app-state';
+import { Controls } from './Controls';
 
 
 const background = new BackgroundInterface();
@@ -26,7 +27,7 @@ interface SetTabLevelAction {
 
 export function Popup() {
 
-    const [tabs, dispatchTabs] = React.useReducer<React.Reducer<TabEntry[], SetTabsAction | SetTabLevelAction>>((state, action) => {
+    const [tabs, dispatchTabs] = React.useReducer<React.Reducer<UITab[], SetTabsAction | SetTabLevelAction>>((state, action) => {
         switch (action.type) {
             case 'setTabLevel':
                 return state.map(t => {
@@ -39,7 +40,10 @@ export function Popup() {
                     return t;
                 });
             case 'setTabs':
-                return action.tabs;
+                return action.tabs.map(t => ({
+                    ...t,
+                    level: state.find(tab => tab.tabId === t.tabId)?.level ?? 0
+                }));
         }
     }, []);
     const [currentTabId, setCurrentTabId] = React.useState<number | null>(null);
@@ -50,7 +54,7 @@ export function Popup() {
                 console.log(message.data.value);
                 dispatchTabs({
                     type: 'setTabLevel',
-                    level: message.data.value / 128,
+                    level: message.data.value,
                     tabId: sender.tab.id 
                 });
             }
@@ -85,7 +89,7 @@ export function Popup() {
 
     return <div style={POPUP_STYLE}>
             <PopupContext.Provider value={context}>
-                <Faders tabs={tabs}/>
+                <Controls tabs={tabs}/>
             </PopupContext.Provider>
         </div>
 }
