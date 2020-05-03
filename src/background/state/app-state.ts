@@ -7,4 +7,6 @@ export interface TabEntry {
 
 export interface AppState {
     tabs: TabEntry[];
+    midiInputs: string[];
+    currentMidiInput: string;
 }

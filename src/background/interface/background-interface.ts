@@ -1,4 +1,4 @@
-import { AppState, TabEntry } from './state/app-state';
+import { AppState, TabEntry } from '../state/app-state';
 import { BackgroundMessageIn, BackgroundMessageOut } from './background-transport';
 
 export interface ChangeListener {
@@ -59,6 +59,13 @@ export class BackgroundInterface {
         sendMessage({
             type: 'setMuted',
             data: { tabId, muted }
+        });
+    }
+
+    setMidiDevice(device: string) {
+        sendMessage({
+            type: 'setMidiDevice',
+            data: { device }
         });
     }
 

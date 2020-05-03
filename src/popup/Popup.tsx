@@ -1,22 +1,22 @@
+import { BackgroundInterface } from 'background/interface/background-interface';
+import { AppState } from 'background/state/app-state';
+import { ContentMessageOut } from 'content/content-transport';
 import * as React from 'react';
 
-import { BackgroundInterface } from 'background/background-interface';
-import { PopupContext } from './PopupContext';
-import { ContentMessageOut } from 'content/content-transport';
-import { UITab } from './domain/UITab';
-import { TabEntry } from 'background/state/app-state';
 import { Controls } from './Controls';
+import { UITab } from './domain/UITab';
+import { PopupContext } from './PopupContext';
+import { Toolbar } from './Toolbar';
 
 
 const background = new BackgroundInterface();
 const POPUP_STYLE: React.CSSProperties = {
-    padding: '5px',
     minWidth: '300px'
 };
 
-interface SetTabsAction {
-    type: 'setTabs';
-    tabs: TabEntry[];
+interface SetBackgroundStateAction {
+    type: 'setState';
+    state: AppState;
 }
 
 interface SetTabLevelAction {
@@ -25,34 +25,56 @@ interface SetTabLevelAction {
     tabId: number;
 }
 
+type PopupAction = SetBackgroundStateAction | SetTabLevelAction;
+
+interface PopupState {
+    tabs: UITab[];
+    midiInputs: string[];
+    currentInput: string;
+}
+
+const INITIAL_STATE: PopupState = {
+    tabs: [],
+    midiInputs: [],
+    currentInput: 'null'
+}
+
 export function Popup() {
 
-    const [tabs, dispatchTabs] = React.useReducer<React.Reducer<UITab[], SetTabsAction | SetTabLevelAction>>((state, action) => {
+    const [state, dispatch] = React.useReducer<React.Reducer<PopupState, PopupAction>>((state, action) => {
         switch (action.type) {
             case 'setTabLevel':
-                return state.map(t => {
-                    if (t.tabId === action.tabId) {
-                        return {
-                            ...t,
-                            level: action.level
-                        };
-                    }
-                    return t;
-                });
-            case 'setTabs':
-                return action.tabs.map(t => ({
-                    ...t,
-                    level: state.find(tab => tab.tabId === t.tabId)?.level ?? 0
-                }));
+                return {
+                        ...state,
+                        tabs: state.tabs.map(t => {
+                        if (t.tabId === action.tabId) {
+                            return {
+                                ...t,
+                                level: action.level
+                            };
+                        }
+                        return t;
+                    })
+                };
+            case 'setState':
+                return {
+                    ...state,
+                    midiInputs: action.state.midiInputs,
+                    currentInput: action.state.currentMidiInput,
+                    tabs: action.state.tabs.map(t => ({
+                        ...t,
+                        level: state.tabs.find(tab => tab.tabId === t.tabId)?.level ?? 0
+                    }))
+                };
         }
-    }, []);
+    }, INITIAL_STATE);
     const [currentTabId, setCurrentTabId] = React.useState<number | null>(null);
 
     function onContentMessage(message: ContentMessageOut, sender: chrome.runtime.MessageSender) {
         if (message.type === 'vuData') {
             if (sender.tab?.id != null) {
                 console.log(message.data.value);
-                dispatchTabs({
+                dispatch({
                     type: 'setTabLevel',
                     level: message.data.value,
                     tabId: sender.tab.id 
@@ -60,8 +82,6 @@ export function Popup() {
             }
         }
     }
-
-
 
     React.useEffect(() => {
         background.refresh();
@@ -72,7 +92,7 @@ export function Popup() {
         });
         chrome.runtime.onMessage.addListener(onContentMessage);
         const onStateChange = background.onStateChange(change => {
-            dispatchTabs({type: 'setTabs', tabs: change.tabs });
+            dispatch({type: 'setState', state: change });
         });
 
         return () => {
@@ -89,7 +109,8 @@ export function Popup() {
 
     return <div style={POPUP_STYLE}>
             <PopupContext.Provider value={context}>
-                <Controls tabs={tabs}/>
+                <Toolbar midiInputs={state.midiInputs} currentInput={state.currentInput}/>
+                <Controls tabs={state.tabs}/>
             </PopupContext.Provider>
         </div>
 }

@@ -1,11 +1,15 @@
-import { BackgroundMessageIn, BackgroundMessageOut } from './background-transport';
+import { BackgroundMessageIn } from './interface/background-transport';
 import { AppStorage } from './state/app-storage';
 import { ContentInterface } from 'content/content-interface';
+import { StateController } from './state-controller';
+import { MidiController } from './midi-controller';
 
 export class BackgroundListener {
 
     constructor(
             private readonly storage: AppStorage, 
+            private readonly stateController: StateController,
+            private readonly midiController: MidiController,
             private readonly content: ContentInterface) {
     }
 
@@ -13,7 +17,7 @@ export class BackgroundListener {
         chrome.runtime.onMessage.addListener(message => this.handleMessage(message));
         chrome.tabs.onRemoved.addListener(tabId => {
             this.storage.removeTab(tabId);
-            this.refresh();
+            this.stateController.refresh();
         });
     }
 
@@ -21,41 +25,33 @@ export class BackgroundListener {
         switch (message.type) {
             case 'addTab':
                 this.storage.addTab(message.data);
-                this.refresh();
+                this.stateController.refresh();
                 break;
             case 'removeTab':
                 this.storage.removeTab(message.data);
-                this.refresh();
+                this.stateController.refresh();
                 break;
             case 'moveTab':
                 this.storage.moveTab(message.data.tabId, message.data.newIndex);
-                this.refresh();
+                this.stateController.refresh();
                 break;
             case 'refresh':
-                this.refresh();
+                this.stateController.refresh();
                 break;
             case 'setVolume':
                 this.storage.setTabVolume(message.data.tabId, message.data.volume);
                 this.content.setVolume(message.data.tabId, message.data.volume);
-                this.refresh();
+                this.stateController.refresh();
                 break;
             case 'setMuted':
                 this.storage.setTabMuted(message.data.tabId, message.data.muted);
                 this.content.setMuted(message.data.tabId, message.data.muted);
-                this.refresh();
+                this.stateController.refresh();
+                break;
+            case 'setMidiDevice':
+                this.midiController.useDevice(this.midiController.getConfigForDevice(message.data.device));
+                break;
         }
     }
-
-    private refresh() {
-        sendMessage({
-            type: 'refresh',
-            data: {
-                tabs: this.storage.getAllTabs()
-            }
-        });
-    }
 }
 
-function sendMessage(m: BackgroundMessageOut) {
-    chrome.runtime.sendMessage(m);
-}

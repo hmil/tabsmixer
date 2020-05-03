@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { BackgroundInterface } from 'background/background-interface';
+import { BackgroundInterface } from 'background/interface/background-interface';
 
 export interface PopupContext {
     background: BackgroundInterface;

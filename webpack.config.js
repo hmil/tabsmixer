@@ -44,6 +44,9 @@ module.exports = {
             new TsconfigPathsPlugin()
         ]
     },
+    externals: {
+        'webmidi': 'WebMidi'
+    },
     optimization: {
         splitChunks: {
             cacheGroups: {
