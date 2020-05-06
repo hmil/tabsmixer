@@ -3,9 +3,12 @@ import { BackgroundMessageOut } from './interface/background-transport';
 
 export class StateController {
 
+    private internalListeners: Array<() => void> = [];
+
     constructor(private readonly storage: AppStorage) { }
 
     public refresh() {
+        this.internalListeners.forEach(l => l());
         sendMessage({
             type: 'refresh',
             data: {
@@ -14,6 +17,10 @@ export class StateController {
                 currentMidiInput: this.storage.getCurrentMidiInput()
             }
         });
+    }
+
+    public onRefresh(l: () => void) {
+        this.internalListeners.push(l);
     }
 }
 
