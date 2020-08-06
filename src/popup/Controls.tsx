@@ -96,7 +96,7 @@ export function Controls({tabs}: ControlsProps) {
         { renderTabs() }
         { currentTabId != null && !hasCurrentTab ? <AddTabButton currentTabId={currentTabId}/> : undefined }
         { draggedTab != null ? 
-            <div style={{position: 'absolute', left: dragPosition}}><TabControl tab={draggedTab} /></div>
+            <div style={{position: 'absolute', left: dragPosition, boxShadow: '1px 1px 1px #00000090', opacity: 0.9, transform: 'scale(0.95)'}}><TabControl tab={draggedTab} /></div>
             : undefined
         }
     </div>;

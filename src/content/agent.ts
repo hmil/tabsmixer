@@ -124,22 +124,14 @@ function agent() {
     Array.from(document.getElementsByTagName('audio')).forEach(captureAudioElement);
     Array.from(document.getElementsByTagName('video')).forEach(captureAudioElement);
 
-    const setVolume = (window as any).setVolume = function(volume: number) {
+    const setVolume = function(volume: number) {
         tabVolume = volume;
         gainNodes.forEach(g => g.gain.value = volume);
     };
 
-    const setMuted = (window as any).setMuted = function(muted: boolean) {
+    const setMuted = function(muted: boolean) {
         const gain = muted ? 0 : 1;
         micGainNodes.forEach(g => g.gain.value = gain);
-    };
-
-    (window as any).muteMic = function() {
-        // TODO: Not sure which is best, using 'enabled' or gain node on an audio context...
-        mediaStreams.forEach(s => s.getAudioTracks().forEach(t => t.enabled = false));
-    };
-    (window as any).unmuteMic = function() {
-        mediaStreams.forEach(s => s.getAudioTracks().forEach(t => t.enabled = true));
     };
 
     addEventListener('message', (message) => {
@@ -159,7 +151,7 @@ function agent() {
             return 0;
         }
         return analyzerNodes
-        .map(a => {
+            .map(a => {
                 const buffer = new Uint8Array(a.fftSize);
                 a.getByteTimeDomainData(buffer);
                 let max = 0.0;
@@ -172,7 +164,7 @@ function agent() {
                 }
                 return max;
             })
-        .reduce((prev, cur) => prev > cur ? prev : cur, 0);
+            .reduce((prev, cur) => prev > cur ? prev : cur, 0);
     }
 
     let previousValue = 0;
@@ -186,8 +178,6 @@ function agent() {
     }
 
     setInterval(analyzeHandler, 100);
-
-    console.log('Méfait accompli');
 
     // Remove self from the DOM to avoid interfering with logic on the page
     const selfScript = document.getElementById('hmil-tabsmixer-agent');

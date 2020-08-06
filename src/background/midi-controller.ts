@@ -1,4 +1,4 @@
-import WebMidi, { InputEventControlchange, Output } from 'webmidi';
+import WebMidi, { InputEventControlchange, Output, InputEventNoteon } from 'webmidi';
 import { AppStorage } from './state/app-storage';
 import { StateController } from './state-controller';
 import { ContentInterface } from 'content/content-interface';
@@ -56,10 +56,28 @@ function launchkeyLedOutputPreset() {
 const MIDI_PRESETS: { [key: string]: MidiDeviceConfig } = {
     'Teensy MIDI': {
         inputName: 'Teensy MIDI',
-        inputs: [41],
+        inputs: [41, 42, 43],
         outputConfig: {
             outputName: 'Teensy MIDI',
-            outputs: [],
+            outputs: [{
+                leds: [{
+                    note: 36,
+                    channel: 16,
+                    mapping: values(1, 128, [0, 31, 63, 95, 127])
+                }]
+            }, {
+                leds: [{
+                    note: 37,
+                    channel: 16,
+                    mapping: values(1, 128, [0, 31, 63, 95, 127])
+                }]
+            }, {
+                leds: [{
+                    note: 38,
+                    channel: 16,
+                    mapping: values(1, 128, [0, 31, 63, 95, 127])
+                }]
+            }],
         }
     },
     'Launchkey MK2 49 Launchkey MIDI': {
@@ -148,11 +166,17 @@ export class MidiController {
                         this.stateController.refresh();
                     }
                 }
-            }
+            };
+
+            const onNoteOn = (evt: InputEventNoteon) => {
+                console.log(evt.note);
+            };
 
             input.addListener('controlchange', 1, onInputChange);
+            input.addListener('noteon', 16, onNoteOn);
             deactivate = () => {
                 input.removeListener('controlchange', 1, onInputChange);
+                input.removeListener('noteon', 16, onNoteOn);
             };
         }
 
@@ -231,7 +255,6 @@ export class MidiController {
             } else {
                 ss.hasZero = false;
             }
-            console.log(`${i} ${value}`);
             o.leds.forEach(l => {
                 const velocity = l.mapping ? l.mapping(value) : value;
                 if (velocity > 0) {
